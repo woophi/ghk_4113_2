@@ -10,7 +10,7 @@ import { Switch } from '@alfalab/core-components/switch';
 import { Typography } from '@alfalab/core-components/typography';
 import { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import longread from './assets/longread.png';
+import longread from './assets/longread.jpg';
 import rubIcon from './assets/rubIcon.png';
 import sber from './assets/sber.png';
 import { LS, LSKeys } from './ls';
@@ -24,22 +24,23 @@ const OPTIONS = [
   { key: '30 дней', value: 30, content: '30 дней' },
 ];
 const SAFE_OPTIONS = [
-  { title: '100%', value: 100 },
-  { title: '50%', value: 50 },
-  { title: '30%', value: 30 },
+  { title: '20%', value: 20 },
   { title: '10%', value: 10 },
   { title: '5%', value: 5 },
+  { title: '2,5%', value: 2.5 },
 ];
+
+const COMMISSION = 7.56;
 
 export const App = () => {
   const [loading, setLoading] = useState(false);
   const [thxShow, setThx] = useState(false);
   const [showBs, setShowBs] = useState(false);
-  const [price, setPrice] = useState(228.7);
+  const [price, setPrice] = useState(272.05);
   const [count, setCount] = useState(10);
   const [selectedEns, setSelectedEns] = useState(false);
   const [reqType, setReqTpe] = useState(7);
-  const [safeOption, setSafeOption] = useState(100);
+  const [safeOption, setSafeOption] = useState(20);
 
   useEffect(() => {
     if (!LS.getItem(LSKeys.UserId, null)) {
@@ -54,10 +55,10 @@ export const App = () => {
   const safeSum = Number((percentageLoss * sum * percantageSafe).toFixed(2));
   const safeValue = Number((safeSum / 2).toFixed(2));
 
-  const total = selectedEns ? safeValue + sum : sum;
+  const total = (selectedEns ? safeValue + sum : sum) + COMMISSION;
 
   const submit = () => {
-    window.gtag('event', 'Buy_insurance_3946_click_var2');
+    window.gtag('event', 'Buy_insurance_4113_click_var2');
 
     setLoading(true);
     sendDataToGA({
@@ -184,7 +185,7 @@ export const App = () => {
           block
           view="primary"
           onClick={() => {
-            window.gtag('event', 'Buy_main_3946_click_var2');
+            window.gtag('event', 'Buy_main_4113_click_var2');
             setShowBs(true);
           }}
         >
@@ -214,7 +215,7 @@ export const App = () => {
                   Итого {total.toLocaleString('ru')} ₽
                 </Typography.TitleResponsive>
                 <Typography.Text color="secondary-inverted" tag="p" view="primary-medium" defaultMargins={false}>
-                  {selectedEns ? 'Включая защиту' : 'Без защиты'}
+                  {selectedEns ? 'Включая защиту и комиссию' : 'Без защиты'}
                 </Typography.Text>
               </div>
               <CDNIcon name="glyph_chevron-right_m" />
@@ -234,9 +235,6 @@ export const App = () => {
               </Typography.Text>
             </div>
           </div>
-          <Typography.TitleResponsive tag="h3" view="xsmall" font="system" weight="semibold">
-            Счет списания
-          </Typography.TitleResponsive>
 
           <div className={appSt.inputBox}>
             <img src={rubIcon} width={48} height={48} />
@@ -244,7 +242,7 @@ export const App = () => {
               Текущий счет
             </Typography.TitleResponsive>
           </div>
-          <div>
+          <div style={{ marginLeft: '8px' }}>
             <Typography.Text tag="p" view="primary-medium" defaultMargins={false}>
               Покупка акций и комиссия
             </Typography.Text>
@@ -299,10 +297,14 @@ export const App = () => {
                 </span>
               </div>
             </div>
-            <Typography.Text view="component-secondary" color="secondary">
+            <Typography.Text style={{ marginLeft: '8px' }} view="component-secondary" color="secondary">
               Вы покупаете {count} {getWordEnding(count, ['акцию', 'акции', 'акций'])} Сбербанка
             </Typography.Text>
           </div>
+
+          <Typography.Text style={{ marginLeft: '8px' }} view="component-secondary" color="secondary">
+            Комиссия ≈ {COMMISSION.toLocaleString('ru')} ₽
+          </Typography.Text>
 
           <Switch
             block
@@ -311,7 +313,7 @@ export const App = () => {
             label="Защитить сделку"
             hint="Если стоимость актива упадет и вы зафиксируете позицию в период действия защиты, мы компенсируем убытки согласно выбранным настройкам."
             onChange={() => {
-              window.gtag('event', 'insurance_3946_click_var2');
+              window.gtag('event', 'insurance_4113_click_var2');
               setSelectedEns(!selectedEns);
             }}
             className={appSt.switchItem}
@@ -328,10 +330,11 @@ export const App = () => {
               selected={OPTIONS.find(o => o.value === reqType)}
               label="Срок защиты"
               labelView="outer"
+              className={appSt.selectStyle}
             />
             <div style={{ marginTop: '1rem' }}>
-              <Typography.Text view="component-secondary" color="secondary">
-                Объём потенциального убытка для защиты
+              <Typography.Text style={{ marginLeft: '8px' }} view="component-secondary" color="secondary">
+                Защита сработает, если цена снизится на:
               </Typography.Text>
               <Swiper spaceBetween={12} slidesPerView="auto" style={{ marginTop: '.5rem' }}>
                 {SAFE_OPTIONS.map(o => (
@@ -346,9 +349,15 @@ export const App = () => {
               </Swiper>
             </div>
 
-            <div className={appSt.inputs}>
-              <Input readOnly label="Защищенная сумма" labelView="outer" value={`${safeSum.toLocaleString('ru')} ₽`} />
-              <Input readOnly label="Стоимость" labelView="outer" value={`${safeValue.toLocaleString('ru')} ₽`} />
+            <div style={{ marginTop: '1rem' }}>
+              <Input
+                block
+                readOnly
+                label="Стоимость защиты"
+                labelView="outer"
+                value={`${safeValue.toLocaleString('ru')} ₽`}
+                className={appSt.inputLabelStyle}
+              />
             </div>
           </Collapse>
         </div>
