@@ -65,10 +65,10 @@ export const App = () => {
       quantity: count,
       price,
       term: selectedEns ? reqType : 'Nan',
-      percent: selectedEns ? safeOption : 'Nan',
-      percent_down: 'Nan',
+      percent_down: selectedEns ? safeOption : 'Nan',
       cost: selectedEns ? safeValue : 0,
       id: LS.getItem(LSKeys.UserId, null) ?? 0,
+      komiss: COMMISSION,
     }).then(() => {
       setThx(true);
       setLoading(false);
